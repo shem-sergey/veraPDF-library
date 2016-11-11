@@ -80,7 +80,9 @@ final class MrrHandler extends AbstractXmlHandler {
 		try {
 			indentElement(job);
 			XmlSerialiser.toXml(result.getProcessedItem(), this.writer, true, true);
-			XmlSerialiser.toXml(result.getValidationResult(), this.writer, true, true);
+			for(TaskType type : result.getResults().keySet()) {
+				serializeTaskResult(type, result);
+			}
 			outdentElement();
 		} catch (JAXBException | XMLStreamException excep) {
 			logger.log(Level.WARNING, streamingErrMessage, excep);
@@ -88,6 +90,20 @@ final class MrrHandler extends AbstractXmlHandler {
 		}
 	}
 
+	private void serializeTaskResult(TaskType type, ProcessorResult result)
+			throws JAXBException, XMLStreamException{
+		switch (type) {
+			case VALIDATE:
+				XmlSerialiser.toXml(result.getValidationResult(), this.writer, true, true);
+				break;
+			case EXTRACT_FEATURES:
+				XmlSerialiser.toXml(result.getFeaturesReport(), this.writer, true, true);
+				break;
+			case FIX_METADATA:
+				XmlSerialiser.toXml(result.getFixerResult(), this.writer, true, true);
+				break;
+		}
+	}
 	/**
 	 * @see org.verapdf.processor.BatchProcessingHandler#handleBatchEnd(org.verapdf.processor.BatchSummary)
 	 */
